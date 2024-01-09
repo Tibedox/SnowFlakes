@@ -9,15 +9,26 @@ import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.TimeUtils;
 
 public class ScreenGame implements Screen {
+    MyGame game;
+
+    SpriteBatch batch;
+    OrthographicCamera camera;
+    Vector3 touch;
+    BitmapFont font;
+    BitmapFont fontRecords;
+    BitmapFont fontLarge;
+    
     InputKeyboard keyboard;
 
     Texture imgBackGround;
@@ -40,7 +51,15 @@ public class ScreenGame implements Screen {
     int score;
     String namePlayer = "Player";
 
-    public ScreenGame(){
+    public ScreenGame(MyGame myGame) {
+        game = myGame;
+        batch = game.batch;
+        camera = game.camera;
+        touch = game.touch;
+        fontLarge = game.fontLarge;
+        font = game.font;
+        fontRecords = game.fontRecords;
+        
         keyboard = new InputKeyboard(SCR_WIDTH, SCR_HEIGHT, 10);
 
         imgBackGround = new Texture("bg1.png");
@@ -50,8 +69,8 @@ public class ScreenGame implements Screen {
         sndChpok = Gdx.audio.newSound(Gdx.files.internal("chpok.mp3"));
 
         btnSound = new MyButton(10, SCR_HEIGHT-60, 50);
-        btnRestart = new MyButton("RESTART", MyGame.getGame().font, SCR_WIDTH/3, SCR_HEIGHT/8);
-        btnExit = new MyButton("MAINMENU", MyGame.getGame().font, SCR_WIDTH*1.8f/3, SCR_HEIGHT/8);
+        btnRestart = new MyButton("RESTART", font, SCR_WIDTH/3, SCR_HEIGHT/8);
+        btnExit = new MyButton("MAINMENU", font, SCR_WIDTH*1.8f/3, SCR_HEIGHT/8);
 
         for (int i = 0; i < snowFlakes.length; i++) {
             snowFlakes[i] = new SnowFlake();
@@ -72,12 +91,12 @@ public class ScreenGame implements Screen {
     @Override
     public void render(float delta) {
 // обработка касаний
-		/*if(Gdx.input.justMyGame.getGame().touched()){
-			MyGame.getGame().touch.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-			MyGame.getGame().camera.unproject(MyGame.getGame().touch);
-			System.out.println(MyGame.getGame().touch.x + " "+ MyGame.getGame().touch.y);
+		/*if(Gdx.input.justtouched()){
+			touch.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+			camera.unproject(touch);
+			System.out.println(touch.x + " "+ touch.y);
 			for (int i = 0; i < snowFlakes.length; i++) {
-				if(snowFlakes[i].hit(MyGame.getGame().touch.x, MyGame.getGame().touch.y)) {
+				if(snowFlakes[i].hit(touch.x, touch.y)) {
 					snowFlakes[i].respawn();
 				}
 			}
@@ -98,27 +117,27 @@ public class ScreenGame implements Screen {
         }
 
         // отрисовка
-        MyGame.getGame().camera.update();
-        MyGame.getGame().batch.setProjectionMatrix(MyGame.getGame().camera.combined);
-        MyGame.getGame().batch.begin();
-        MyGame.getGame().batch.draw(imgBackGround, 0, 0, SCR_WIDTH, SCR_HEIGHT);
+        camera.update();
+        batch.setProjectionMatrix(camera.combined);
+        batch.begin();
+        batch.draw(imgBackGround, 0, 0, SCR_WIDTH, SCR_HEIGHT);
         for (int i = 0; i < snowFlakes.length; i++) {
-            MyGame.getGame().batch.draw(imgSnowFlake, snowFlakes[i].x, snowFlakes[i].y, snowFlakes[i].width/2, snowFlakes[i].height/2,
+            batch.draw(imgSnowFlake, snowFlakes[i].x, snowFlakes[i].y, snowFlakes[i].width/2, snowFlakes[i].height/2,
                     snowFlakes[i].width, snowFlakes[i].height, 1, 1, snowFlakes[i].angle, 0, 0, 100, 100, false, false);
         }
-        MyGame.getGame().batch.draw(isSoundOn?imgBtnSoundOn:imgBtnSoundOff, btnSound.x, btnSound.y, btnSound.width, btnSound.height);
-        MyGame.getGame().font.draw(MyGame.getGame().batch, "СНЕЖИНОК: "+score, SCR_WIDTH-10-textWidth("СНЕЖИНОК: "+score, MyGame.getGame().font), SCR_HEIGHT-20);
-        MyGame.getGame().font.draw(MyGame.getGame().batch, timeOfGame, 0, SCR_HEIGHT - 20, SCR_WIDTH, Align.center, true);
+        batch.draw(isSoundOn?imgBtnSoundOn:imgBtnSoundOff, btnSound.x, btnSound.y, btnSound.width, btnSound.height);
+        font.draw(batch, "СНЕЖИНОК: "+score, SCR_WIDTH-10-textWidth("СНЕЖИНОК: "+score, font), SCR_HEIGHT-20);
+        font.draw(batch, timeOfGame, 0, SCR_HEIGHT - 20, SCR_WIDTH, Align.center, true);
         if(isGameOver) {
-            MyGame.getGame().fontLarge.draw(MyGame.getGame().batch, "GAME OVER", 0, SCR_HEIGHT*8.5f/10, SCR_WIDTH, Align.center, true);
+            fontLarge.draw(batch, "GAME OVER", 0, SCR_HEIGHT*8.5f/10, SCR_WIDTH, Align.center, true);
             for (int i = 0; i < players.length-1; i++) {
-                MyGame.getGame().fontRecords.draw(MyGame.getGame().batch, players[i].name+"....."+players[i].score, 0, SCR_HEIGHT*7.3f/10-40*i, SCR_WIDTH, Align.center, true);
+                fontRecords.draw(batch, players[i].name+"....."+players[i].score, 0, SCR_HEIGHT*7.3f/10-40*i, SCR_WIDTH, Align.center, true);
             }
-            btnRestart.font.draw(MyGame.getGame().batch, btnRestart.text, btnRestart.x, btnRestart.y);
-            btnExit.font.draw(MyGame.getGame().batch, btnExit.text, btnExit.x, btnExit.y);
+            btnRestart.font.draw(batch, btnRestart.text, btnRestart.x, btnRestart.y);
+            btnExit.font.draw(batch, btnExit.text, btnExit.x, btnExit.y);
         }
-        if(isEnterName) keyboard.draw(MyGame.getGame().batch);
-        MyGame.getGame().batch.end();
+        if(isEnterName) keyboard.draw(batch);
+        batch.end();
     }
 
     @Override
@@ -228,15 +247,15 @@ public class ScreenGame implements Screen {
 
         @Override
         public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-            MyGame.getGame().touch.set(screenX, screenY, 0);
-            MyGame.getGame().camera.unproject(MyGame.getGame().touch);
+            touch.set(screenX, screenY, 0);
+            camera.unproject(touch);
 
-            if(btnSound.hit(MyGame.getGame().touch.x, MyGame.getGame().touch.y)) {
+            if(btnSound.hit(touch.x, touch.y)) {
                 isSoundOn = !isSoundOn;
             }
             if(isGameOver) {
                 if(isEnterName) {
-                    if (keyboard.endOfEdit(MyGame.getGame().touch.x, MyGame.getGame().touch.y)) {
+                    if (keyboard.endOfEdit(touch.x, touch.y)) {
                         namePlayer = keyboard.getText();
                         isEnterName = false;
                         loadRecords();
@@ -244,16 +263,16 @@ public class ScreenGame implements Screen {
                         saveRecords();
                     }
                 }
-                if(btnRestart.hit(MyGame.getGame().touch.x, MyGame.getGame().touch.y) & !isEnterName){
+                if(btnRestart.hit(touch.x, touch.y) & !isEnterName){
                     restartGame();
                 }
-                if(btnExit.hit(MyGame.getGame().touch.x, MyGame.getGame().touch.y) & !isEnterName){
-                    MyGame.getGame().setScreen(MyGame.getGame().screenIntro);
+                if(btnExit.hit(touch.x, touch.y) & !isEnterName){
+                    game.setScreen(game.screenIntro);
                 }
             }
             if(!isGameOver) {
                 for (int i = 0; i < snowFlakes.length; i++) {
-                    if (snowFlakes[i].hit(MyGame.getGame().touch.x, MyGame.getGame().touch.y)) {
+                    if (snowFlakes[i].hit(touch.x, touch.y)) {
                         snowFlakes[i].respawn();
                         score++;
                         if (isSoundOn) {

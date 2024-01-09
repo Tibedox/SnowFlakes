@@ -5,23 +5,39 @@ import static com.mygdx.game.MyGame.SCR_WIDTH;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector3;
 
 public class ScreenSettings implements Screen {
+    MyGame game;
 
+    SpriteBatch batch;
+    OrthographicCamera camera;
+    Vector3 touch;
+    BitmapFont fontLarge;
+    
     Texture imgBackGround;
 
     MyButton btnPlay;
     MyButton btnSettings;
     MyButton btnExit;
 
-    public ScreenSettings() {
+    public ScreenSettings(MyGame myGame) {
+        game = myGame;
+        batch = game.batch;
+        camera = game.camera;
+        touch = game.touch;
+        fontLarge = game.fontLarge;
+        
         imgBackGround = new Texture("bg1.png");
-        btnPlay = new MyButton("Settings", MyGame.getGame().fontLarge, 0, SCR_HEIGHT*3/4);
+        btnPlay = new MyButton("Settings", fontLarge, 0, SCR_HEIGHT*3/4);
         btnPlay.x = SCR_WIDTH/2;
-        btnSettings = new MyButton("Settings", MyGame.getGame().fontLarge, 0, SCR_HEIGHT/2);
+        btnSettings = new MyButton("Settings", fontLarge, 0, SCR_HEIGHT/2);
         btnSettings.x = SCR_WIDTH/2;
-        btnExit = new MyButton("Exit", MyGame.getGame().fontLarge, 0, SCR_HEIGHT/4);
+        btnExit = new MyButton("Exit", fontLarge, 0, SCR_HEIGHT/4);
         btnExit.x = SCR_WIDTH/2;
     }
 
@@ -34,14 +50,14 @@ public class ScreenSettings implements Screen {
     public void render(float delta) {
     // обработка касаний
 		if(Gdx.input.justTouched()){
-			MyGame.getGame().touch.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-			MyGame.getGame().camera.unproject(MyGame.getGame().touch);
+			touch.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+			camera.unproject(touch);
 
-            if(btnPlay.hit(MyGame.getGame().touch.x, MyGame.getGame().touch.y)) {
+            if(btnPlay.hit(touch.x, touch.y)) {
 
             }
-            if(btnExit.hit(MyGame.getGame().touch.x, MyGame.getGame().touch.y)) {
-                MyGame.getGame().setScreen(MyGame.getGame().screenIntro);
+            if(btnExit.hit(touch.x, touch.y)) {
+                game.setScreen(game.screenIntro);
             }
 		}
 
@@ -49,13 +65,13 @@ public class ScreenSettings implements Screen {
 
 
         // отрисовка
-        MyGame.getGame().batch.setProjectionMatrix(MyGame.getGame().camera.combined);
-        MyGame.getGame().batch.begin();
-        MyGame.getGame().batch.draw(imgBackGround, 0, 0, SCR_WIDTH, SCR_HEIGHT);
-        btnPlay.font.draw(MyGame.getGame().batch, btnPlay.text, btnPlay.x, btnPlay.y);
-        btnSettings.font.draw(MyGame.getGame().batch, btnSettings.text, btnSettings.x, btnSettings.y);
-        btnExit.font.draw(MyGame.getGame().batch, btnExit.text, btnExit.x, btnExit.y);
-        MyGame.getGame().batch.end();
+        batch.setProjectionMatrix(camera.combined);
+        batch.begin();
+        batch.draw(imgBackGround, 0, 0, SCR_WIDTH, SCR_HEIGHT);
+        btnPlay.font.draw(batch, btnPlay.text, btnPlay.x, btnPlay.y);
+        btnSettings.font.draw(batch, btnSettings.text, btnSettings.x, btnSettings.y);
+        btnExit.font.draw(batch, btnExit.text, btnExit.x, btnExit.y);
+        batch.end();
     }
 
     @Override

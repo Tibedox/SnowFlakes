@@ -23,8 +23,6 @@ import java.util.Arrays;
 public class MyGame extends Game {
 	public static final float SCR_WIDTH = 1280, SCR_HEIGHT = 720;
 
-	private static MyGame game;
-
 	SpriteBatch batch;
 	OrthographicCamera camera;
 	Vector3 touch;
@@ -36,10 +34,6 @@ public class MyGame extends Game {
 	ScreenGame screenGame;
 	ScreenSettings screenSettings;
 
-	public MyGame() {
-		game = this;
-	}
-
 	@Override
 	public void create () { // вызывается в начале игры
 		batch = new SpriteBatch();
@@ -49,9 +43,9 @@ public class MyGame extends Game {
 
 		generateFont();
 
-		screenIntro = new ScreenIntro();
-		screenGame = new ScreenGame();
-		screenSettings = new ScreenSettings();
+		screenIntro = new ScreenIntro(this);
+		screenGame = new ScreenGame(this);
+		screenSettings = new ScreenSettings(this);
 		setScreen(screenIntro);
 	}
 	
@@ -61,10 +55,6 @@ public class MyGame extends Game {
 		font.dispose();
 		fontRecords.dispose();
 		fontLarge.dispose();
-	}
-
-	public static MyGame getGame(){
-		return game;
 	}
 
 	void generateFont(){
